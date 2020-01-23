@@ -1,0 +1,112 @@
+#if defined(__cplusplus) && \
+   defined(_AEABI_PORTABILITY_LEVEL) && _AEABI_PORTABILITY_LEVEL != 0
+  extern "C" {
+    extern const double      __aeabi_HUGE_VAL;
+    extern const long double __aeabi_HUGE_VALL;
+    extern const float       __aeabi_HUGE_VALF;
+    extern const float       __aeabi_INFINITY;
+    extern const float       __aeabi_NAN;
+  }
+#define	HUGE_VAL	__aeabi_HUGE_VAL
+#define	HUGE_VALF	__aeabi_HUGE_VALF
+#define	HUGE_VALL	__aeabi_HUGE_VALL
+#define	INFINITY	__aeabi_INFINITY
+#define	NAN		__aeabi_NAN
+#elif defined(__clang__)
+#if __has_builtin(__builtin_inf)
+#define	HUGE_VAL	__builtin_inf()
+#define	HUGE_VALF	__builtin_inff()
+#define	HUGE_VALL	__builtin_infl()
+#define	INFINITY	__builtin_inff()
+#define	NAN		__builtin_nanf("")
+#else
+#error "__builtin_inf is not available"
+#endif
+#else
+#define	HUGE_VAL	((double)__INFINITY__)
+#define	HUGE_VALF	(__INFINITY__)
+#define	HUGE_VALL	((long double)__INFINITY__)
+#define	INFINITY	(__INFINITY__)
+#define	NAN		(__NAN__)
+#endif
+
+#define	FP_ILOGB0	(-__INT_MAX)
+#define	FP_ILOGBNAN	(__INT_MAX)
+
+#define	MATH_ERRNO	1
+#define	MATH_ERREXCEPT	2
+#define	math_errhandling (MATH_ERRNO)
+
+#if defined(__ARM_FP) && defined(__ARM_FEATURE_FMA)
+#if __ARM_FP & 0x4
+#define	FP_FAST_FMAF	1
+#endif
+
+#if __ARM_FP & 0x8
+#define	FP_FAST_FMA	1
+#define	FP_FAST_FMAL	1
+#endif
+#endif
+
+/* Symbolic constants to classify floating point numbers. */
+#define	FP_INFINITE	(__FP_INFINITE)
+#define	FP_NAN		(__FP_NAN)
+#define	FP_NORMAL	(__FP_NORMAL)
+#define	FP_SUBNORMAL	(__FP_SUBNORMAL)
+#define	FP_ZERO		(__FP_ZERO)
+
+
+#if (__STDC_VERSION__ >= 201112L)
+#define	__fp_type_select(x, f, d, ld) _Generic((x),			\
+    float: f(x),							\
+    double: d(x),							\
+    long double: ld(x),							\
+    volatile float: f(x),						\
+    volatile double: d(x),						\
+    volatile long double: ld(x),					\
+    volatile const float: f(x),						\
+    volatile const double: d(x),					\
+    volatile const long double: ld(x),					\
+    const float: f(x),							\
+    const double: d(x),							\
+    const long double: ld(x))
+#elif (__STDC_VERSION__ >= 199901L) && defined(__EDG_VERSION__)
+#define	__fp_type_select(x, f, d, ld) __generic((x),,, d, f, ld,,,)(x)
+#else
+#define	 __fp_type_select(x, f, d, ld)					\
+    ((sizeof(x) == sizeof(float)) ? (f)(x)				\
+    : (sizeof(x) == sizeof(double)) ? (d)(x)				\
+    : (ld)(x))
+#endif
+
+
+#####################################################################
+#####################################################################
+
+C,c++ 함수 결합 예제(TI msp430 math.h) 
+
+#if defined(__cplusplus)
+   extern "C" {
+	extern const double		__aeabi_HUGE_VAL;
+	extern const float		__aeabi_HUGE_VALF;
+	extern const long double	__aeabi_HUGE_VALL;
+	......(생략)
+   }
+
+#elif define(__clang__)
+#define HUGE_VAL	__builtin_inf()
+#define HUGE_VALF	__builtin_inff()
+#define HUGE_VALL	__builtin_infl()
+......(생략)
+
+#else
+#error "__builtin_inf is not available" 
+#endif
+
+#else
+ #define HUGE_VAL	((double)__INFINITY__)
+ #define HUGE_VALF	(__INFINITY__)
+ #define HUGE_VALL	((Long double)__INFINITY__)
+ ......(생략)
+#endif
+
